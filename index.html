@@ -189,6 +189,28 @@ input:focus{box-shadow:0 0 0 3px rgba(168,19,42,.12)}
 @keyframes nudge{0%,100%{transform:none}50%{transform:scale(1.015)}}
 #toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);max-width:92vw;width:max-content;background:#2b211c;color:#fff;padding:13px 18px;border-radius:12px;font-size:.95rem;line-height:1.35;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:99;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+/* ---- admin ---- */
+.admlink{margin-top:6px;font-size:11px}.admlink a{color:#9a8e82;text-decoration:none}.admlink a:hover{text-decoration:underline;color:#a8132a}
+#adm{position:fixed;inset:0;background:rgba(43,33,28,.55);z-index:50;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;animation:fadeIn .2s ease-out both}
+.admbox{background:#fff;border-radius:12px;width:100%;max-width:560px;margin:auto 0;padding:16px;border-top:5px solid #a8132a;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:fadeUp .3s ease-out both}
+.admhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.admhead b{font-size:1.05rem;color:#a8132a}
+.admbox button{flex:none;padding:10px 14px;font-size:.9rem}
+.admbox .row{margin-top:12px}.admbox .row button{flex:1 1 120px}
+.admbox label{display:block;font-weight:700;font-size:.82rem;margin:12px 0 5px}
+.admbox textarea,.admbox select{width:100%;padding:11px 12px;font-size:1rem;border:1px solid #cdbfa8;border-radius:8px;background:#fff;color:#1a1214;font-family:inherit}
+.admbox textarea{min-height:96px;resize:vertical}
+.admbox textarea:focus,.admbox select:focus{outline:none;border-color:#a8132a;box-shadow:0 0 0 3px rgba(168,19,42,.12)}
+.admbar{display:flex;gap:8px;margin-bottom:10px}.admbar input{flex:1;min-width:0}
+#admList{max-height:56vh;overflow:auto}
+.admrow{display:flex;gap:10px;align-items:center;padding:10px 4px;border-bottom:1px solid #f0e2da;cursor:pointer}
+.admrow:hover{background:#fbf4ef}
+.admrow .tx{flex:1;min-width:0}.admrow b{display:block;font-size:.88rem;font-weight:600;overflow-wrap:anywhere}
+.admrow small{display:block;color:#7d6f62;font-size:.74rem;overflow-wrap:anywhere}
+.pill{flex:none;font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:999px;background:#eee;color:#5a4d43}
+.pill.ya{background:#dff3e6;color:#1d6b43}
+.admmsg{font-size:.85rem;color:#a8132a;min-height:1.2em;margin-top:8px}
+.admcount{font-size:.78rem;color:#7d6f62;margin:0 0 6px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -254,7 +276,32 @@ input:focus{box-shadow:0 0 0 3px rgba(168,19,42,.12)}
 <footer>
   <div class="credit">Sistem ini dibangunkan dengan kos ditanggung sepenuhnya oleh <b>FAIMS EMPIRE</b></div>
   <div class="credit"><span id="contact"></span></div>
+  <div class="credit admlink"><a href="#" id="admLink">Admin</a></div>
 </footer>
+<div id="adm" hidden>
+  <div class="admbox">
+    <div class="admhead"><b id="admTitle">Admin</b><button type="button" class="ghost" id="admX">Tutup</button></div>
+    <div id="admPin">
+      <label for="admPass" style="margin-top:0">PIN Admin</label>
+      <input class="plain" id="admPass" type="password" autocomplete="off" placeholder="Masukkan PIN">
+      <div class="row"><button type="button" class="pri" id="admGo">Masuk</button></div>
+    </div>
+    <div id="admMain" hidden>
+      <div class="admbar"><input class="plain" id="admQ" type="search" placeholder="Cari nama" autocomplete="off"><button type="button" class="pri" id="admAdd">+ Tambah</button></div>
+      <p class="admcount" id="admCount"></p>
+      <div id="admList"></div>
+    </div>
+    <div id="admForm" hidden>
+      <label for="fNama" style="margin-top:0">Nama</label><input class="plain" id="fNama" autocomplete="off">
+      <label for="fJaw">Jawatan (satu jawatan satu baris)</label><textarea id="fJaw"></textarea>
+      <label for="fJenis">Jenis</label><select id="fJenis"><option value="0">Committee (dapat sijil)</option><option value="1">Pasangan (tiada sijil)</option></select>
+      <label for="fIc">No. IC / No. Pasport</label><input class="plain" id="fIc" autocomplete="off" autocapitalize="characters" maxlength="20" placeholder="cth: 900101-03-5123 atau A12345678">
+      <label id="fHadirL" style="display:flex;gap:8px;align-items:center;font-weight:600"><input type="checkbox" id="fHadir" style="width:18px;height:18px;padding:0">Tandakan hadir terus</label>
+      <p class="admmsg" id="fMsg"></p>
+      <div class="row"><button type="button" class="pri" id="fSave">Simpan</button><button type="button" class="sec" id="fHadirBtn">Tandakan hadir</button><button type="button" class="sec" id="fSijil">Jana sijil</button><button type="button" class="ghost" id="fBatal">Kembali</button></div>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ====== TUKAR DI SINI ====== */
@@ -614,6 +661,111 @@ function makePDF(dataUrl, w, h){
   str(x+"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n"+xr+"\n%%EOF");
   return new Blob(parts, {type:"application/pdf"});
 }
+
+
+/* ---------- senarai terkini dari Sheet ---------- */
+function loadSenarai(){
+  if(!CONFIG.apiUrl) return Promise.resolve();
+  return apiGet({action:"senarai"}).then(j => {
+    if(j && j.ok && j.rows && j.rows.length){
+      DATA.length = 0;
+      j.rows.forEach(r => DATA.push([r[0], String(r[1]).split(/\s*;\s*/).filter(Boolean).join("\n"), r[2] ? 1 : 0]));
+      DATA.sort((a,b)=>a[0].localeCompare(b[0]));
+      render();
+    }
+  }).catch(()=>{});
+}
+loadSenarai();
+
+/* ---------- ADMIN ---------- */
+let admPin = "", admRows = [], admCur = null;
+const show = (id, v) => { $(id).hidden = !v; };
+function admOpen(){ $("adm").hidden = false; admView(admPin ? "main" : "pin"); if(!admPin) setTimeout(()=>$("admPass").focus(), 50); else admLoad(); }
+function admClose(){ $("adm").hidden = true; }
+function admView(v){ show("admPin", v==="pin"); show("admMain", v==="main"); show("admForm", v==="form"); $("admTitle").textContent = v==="form" ? (admCur ? "Edit maklumat" : "Tambah nama") : "Admin"; }
+async function admCall(obj){
+  const j = await apiPost(Object.assign({action:"admin", pin:admPin}, obj));
+  if(!j.ok && j.error === "pin salah"){ admPin = ""; admView("pin"); $("admPass").value = ""; note("PIN salah."); }
+  return j;
+}
+async function admLoad(){
+  $("admCount").textContent = "Memuatkan senarai...";
+  try{
+    const j = await admCall({op:"list"});
+    if(!j.ok){ $("admCount").textContent = ""; return false; }
+    admRows = j.rows; admRender(); return true;
+  }catch(e){ $("admCount").textContent = "Sambungan gagal. Cuba lagi."; return false; }
+}
+function admRender(){
+  const q = norm($("admQ").value.trim()), box = $("admList"); box.innerHTML = "";
+  const rows = admRows.filter(r => !q || norm(r.nama).includes(q));
+  $("admCount").textContent = rows.length + " nama" + (q ? " (ditapis)" : "") + "  |  " + admRows.filter(r => r.status === "HADIR").length + " hadir";
+  rows.slice(0, 80).forEach(r => {
+    const d = document.createElement("div"); d.className = "admrow";
+    const tx = document.createElement("div"); tx.className = "tx";
+    const b = document.createElement("b"); b.textContent = r.nama;
+    const s = document.createElement("small"); s.textContent = (r.jenis ? "Pasangan" : r.jawatan.split(/\s*;\s*/)[0]) + (r.ic ? "  |  IC/Pasport ada" : "");
+    tx.appendChild(b); tx.appendChild(s);
+    const p = document.createElement("span"); p.className = "pill" + (r.status === "HADIR" ? " ya" : ""); p.textContent = r.status === "HADIR" ? "Hadir" : "Belum";
+    d.appendChild(tx); d.appendChild(p); d.onclick = () => admForm(r); box.appendChild(d);
+  });
+  if(rows.length > 80){ const m = document.createElement("div"); m.className = "empty"; m.textContent = "Menunjukkan 80 pertama. Taip nama untuk menapis."; box.appendChild(m); }
+}
+function admForm(r){
+  admCur = r || null; $("fMsg").textContent = "";
+  $("fNama").value = r ? r.nama : ""; $("fJaw").value = r ? r.jawatan.split(/\s*;\s*/).join("\n") : "";
+  $("fJenis").value = r && r.jenis ? "1" : "0"; $("fIc").value = r ? r.ic : "";
+  $("fHadir").checked = false;
+  show("fHadirL", !r);
+  show("fHadirBtn", !!r && r.status !== "HADIR");
+  show("fSijil", !!r && !r.jenis);
+  admView("form");
+}
+async function admSave(){
+  const msg = $("fMsg"); msg.textContent = "";
+  const o = {nama: admCur ? admCur.nama : $("fNama").value, namaBaru: $("fNama").value, jawatan: $("fJaw").value, jenis: $("fJenis").value === "1" ? 1 : 0, ic: $("fIc").value};
+  if(!o.namaBaru.trim()){ msg.textContent = "Isi nama."; return false; }
+  if(!o.jawatan.trim()){ msg.textContent = "Isi sekurang-kurangnya satu jawatan."; return false; }
+  note("Menyimpan...", true);
+  try{
+    const j = await admCall(Object.assign({op: admCur ? "save" : "add", hadir: $("fHadir").checked}, o));
+    noteOff();
+    if(!j.ok){ msg.textContent = ({"nama itu sudah ada":"Nama itu sudah ada dalam senarai.","no. ic / pasport tidak sah":"No. IC mesti 12 digit atau No. Pasport 6 hingga 15 huruf dan nombor.","nama tiada":"Nama tiada dalam sistem."})[j.error] || "Gagal menyimpan."; return false; }
+    note(admCur ? "Disimpan." : "Nama ditambah" + (j.siri ? ". No. siri " + j.siri : "."));
+    await admLoad(); loadSenarai(); return o;
+  }catch(e){ noteOff(); msg.textContent = "Sambungan gagal. Cuba lagi."; return false; }
+}
+async function admHadir(){
+  note("Menandakan hadir...", true);
+  try{
+    const j = await admCall({op:"hadir", nama: admCur.nama}); noteOff();
+    if(!j.ok){ $("fMsg").textContent = "Gagal."; return; }
+    note("Ditandakan hadir. No. siri " + j.siri); await admLoad(); admView("main");
+  }catch(e){ noteOff(); $("fMsg").textContent = "Sambungan gagal. Cuba lagi."; }
+}
+async function admSijil(){
+  const o = await admSave(); if(!o) return;
+  const d = [o.namaBaru.replace(/\s+/g," ").trim().toUpperCase(), o.jawatan.split(/\n|;/).map(s=>s.trim()).filter(Boolean).join("\n"), o.jenis];
+  admClose();
+  await sahkan(d, {style:{}});
+  if(cur && o.ic.trim()){ const v = normID(o.ic).slice(0,15); if(validID(v)){ $("ic").value = /^\d{12}$/.test(v) ? idInfo(v).val : v; cur.ic = v; cur.icSaved = v; await draw(); } }
+}
+$("admLink").onclick = e => { e.preventDefault(); admOpen(); };
+$("admX").onclick = admClose;
+$("adm").addEventListener("click", e => { if(e.target === $("adm")) admClose(); });
+$("admGo").onclick = async () => {
+  const p = $("admPass").value.trim(); if(!p) return;
+  admPin = p; note("Menyemak PIN...", true);
+  try{ const ok = await admLoad(); noteOff(); if(ok){ $("admPass").value = ""; admView("main"); } else if(admPin){ admPin = ""; } }
+  catch(e){ noteOff(); admPin = ""; }
+};
+$("admPass").addEventListener("keydown", e => { if(e.key === "Enter") $("admGo").click(); });
+$("admQ").addEventListener("input", admRender);
+$("admAdd").onclick = () => admForm(null);
+$("fBatal").onclick = () => admView("main");
+$("fSave").onclick = async () => { if(await admSave()) admView("main"); };
+$("fHadirBtn").onclick = admHadir;
+$("fSijil").onclick = admSijil;
 
 $("back").onclick = () => { cur = null; buildContact(); $("result").hidden = true; $("search").hidden = false; setStep(1); $("q").value = ""; render(); $("q").focus(); };
 </script>
